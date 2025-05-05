@@ -18,6 +18,7 @@ public class User {
     private String email;
     private Role role;
     private List<LessonProgress> lessonProgress;
+    private String password;
 
     public enum Role {
         TEACHER, STUDENT
