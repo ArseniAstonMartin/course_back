@@ -1,17 +1,4 @@
 spring:
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5432/postgres
-#    username: user
-#    password: password
-#  jpa:
-#    database-platform: org.hibernate.dialect.PostgreSQLDialect
-#    hibernate:
-#      ddl-auto: none
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        format_sql: true
   data:
     mongodb:
       authentication-database: admin
@@ -26,8 +13,11 @@ spring:
     username: ""
     password: ""
 
-#  liquibase:
-#    change-log: classpath:db/changelog/db.changelog-master.yaml
-
 server:
   port: 8080
+
+minio:
+  bucket: media
+  url: http://localhost:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
