@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import udemy.clone.model.course.CourseCreateDto;
 import udemy.clone.model.course.CourseDto;
+import udemy.clone.model.lesson.LessonListDto;
 import udemy.clone.service.CourseService;
 
 import java.util.List;
@@ -32,7 +33,13 @@ public class CourseController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CourseDto findCourseById(@PathVariable String id) {
-        return courseService.findCourseById(id);
+        return courseService.findCourseDtoById(id);
+    }
+
+    @GetMapping("/{id}/lessons")
+    @ResponseStatus(HttpStatus.OK)
+    public List<LessonListDto> findCourseLessonsById(@PathVariable String id) {
+        return courseService.findCourseLessonsById(id);
     }
 
     @PostMapping

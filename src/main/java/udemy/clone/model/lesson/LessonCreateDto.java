@@ -7,6 +7,8 @@ import java.util.List;
 
 @Data
 public class LessonCreateDto {
+    private String courseId;
     private String title;
     private List<ContentBlock> content;
+    private int lessonOrder;
 }
