@@ -9,5 +9,6 @@ import java.util.List;
 public class LessonDto {
     private String id;
     private String title;
+    private String courseId;
     private List<ContentBlock> content;
 }
