@@ -1,46 +1,81 @@
 package udemy.clone.config;
 
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import udemy.clone.model.User;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtProvider {
-    private final SecretKey secretKey;
+    private static final String ACCOUNT_ID = "accountId";
+    private static final String USER_NAME = "userName";
+    private static final String EMAIL = "email";
+    private final SecretKey jwtAccessSecret;
+    private final int expirationInMinutes;
 
-    public String generateToken(User user) {
+    public JwtProvider(@Value("${jwt.secret-key}") String jwtAccessSecret,
+                       @Value("${jwt.expiration}") int expirationInMinutes) {
+        this.jwtAccessSecret = Keys.hmacShaKeyFor(jwtAccessSecret.getBytes());
+        this.expirationInMinutes = expirationInMinutes;
+    }
+
+    public String generateAccessToken(User user) {
+        final Instant accessExpirationInstant = LocalDateTime.now()
+                .plusMinutes(expirationInMinutes).atZone(ZoneId.systemDefault()).toInstant();
+        final Date accessExpiration = Date.from(accessExpirationInstant);
         return Jwts.builder()
-                .setSubject("Token for" + user.getName())
-                .claim("userId", user.getId())
-                .claim("username", user.getName())
-                .claim("role", "ROLE_" + user.getRole())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
+                .setSubject("JWT Auth token")
+                .setExpiration(accessExpiration)
+                .signWith(jwtAccessSecret, SignatureAlgorithm.HS256)
+                .claim(ACCOUNT_ID, user.getId())
+                .claim(USER_NAME, user.getName())
+                .claim(EMAIL, user.getEmail())
                 .compact();
     }
 
-    public JwtAuthentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey.getBytes())
+    public boolean validateAccessToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(jwtAccessSecret)
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException expEx) {
+            log.error("Token is expired", expEx);
+        } catch (UnsupportedJwtException unsEx) {
+            log.error("Unsupported token", unsEx);
+        } catch (MalformedJwtException mjEx) {
+            log.error("Malformed token", mjEx);
+        } catch (SignatureException sigEx) {
+            log.error("Invalid token signature", sigEx);
+        } catch (Exception e) {
+            log.error("Invalid token", e);
+        }
+        return false;
+    }
+
+    public Claims getAccessClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(jwtAccessSecret)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-
-        String role = claims.get("role", String.class);
-        return new UsernamePasswordAuthenticationToken(
-                claims.getSubject(), null, List.of(new SimpleGrantedAuthority(role))
-        );
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(secretKey.getBytes()).build().parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public JwtAuthentication generateJwtAuthentication(Claims claims) {
+        final JwtAuthentication jwtAuthentication = new JwtAuthentication();
+        jwtAuthentication.setId(claims.get(ACCOUNT_ID, String.class));
+        jwtAuthentication.setName(claims.get(USER_NAME, String.class));
+        jwtAuthentication.setEmail(claims.get(EMAIL, String.class));
+        return jwtAuthentication;
     }
 }

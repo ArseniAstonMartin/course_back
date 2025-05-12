@@ -3,36 +3,44 @@ package udemy.clone.config;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
 @Component
-public class JwtFilter extends OncePerRequestFilter {
-    @Autowired
-    private JwtProvider jwtProvider;
+public class JwtFilter extends GenericFilterBean {
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+
+    private final JwtProvider jwtProvider;
+
+    public JwtFilter(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
-        String token = resolveToken(request);
-        if (token != null && jwtProvider.validateToken(token)) {
-            final JwtAuthentication jwtInfoToken = JwtProvider.generateJwtAuthentication(claims);
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
+        final String token = getTokenFromRequest((HttpServletRequest) servletRequest);
+        if (token != null && jwtProvider.validateAccessToken(token)) {
+            final Claims claims = jwtProvider.getAccessClaims(token);
+            final JwtAuthentication jwtInfoToken = jwtProvider.generateJwtAuthentication(claims);
             jwtInfoToken.setAuthenticated(true);
             SecurityContextHolder.getContext().setAuthentication(jwtInfoToken);
         }
-        chain.doFilter(request, response);
+        filterChain.doFilter(servletRequest, servletResponse);
+
+
     }
 
-    private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+    private String getTokenFromRequest(HttpServletRequest request) {
+        final String bearer = request.getHeader(AUTHORIZATION_HEADER);
+        if (bearer != null && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
         }
         return null;
     }

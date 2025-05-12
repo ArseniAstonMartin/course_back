@@ -24,11 +24,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration configuration = new CorsConfiguration();
-                    configuration.setAllowedOrigins(List.of("*"));  // Настроить для продакшена!
-                    configuration.setAllowedMethods(List.of("*"));
-                    configuration.setAllowedHeaders(List.of("*"));
-                    return configuration;
+                    CorsConfiguration corsConfiguration = new CorsConfiguration();
+                    corsConfiguration.setAllowedOrigins(List.of("*"));//добавить домен фронта
+                    corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));//добавить методы HTTP
+                    corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+                    return corsConfiguration;
                 }))
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -41,5 +41,6 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+
     }
 }
