@@ -1,7 +1,7 @@
 package udemy.clone.service;
 
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import udemy.clone.config.JwtAuthentication;
 import udemy.clone.config.JwtProvider;
@@ -23,11 +23,12 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final JwtMapper jwtMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public JwtResponseDto login(LoginRequestDto loginRequestDto) {
         User user = userRepository.findByEmail(loginRequestDto.email())
                 .orElseThrow(() -> new AuthException("Account doesn't exist"));
-        if (!user.getPassword().equals(loginRequestDto.password())) {
+        if (!passwordEncoder.matches(loginRequestDto.password(), user.getPassword())) {
             throw new AuthException("Wrong password");
         }
         final String accessToken = jwtProvider.generateAccessToken(user);
@@ -39,8 +40,10 @@ public class AuthenticationService {
         if (user.isPresent()) {
             throw new AuthException("Account with email = " + registrationDto.email() + " already exist");
         }
-        User newUser = User.builder().email(registrationDto.email())
-                .password(registrationDto.password()).name(registrationDto.name())
+        User newUser = User.builder()
+                .email(registrationDto.email())
+                .password(passwordEncoder.encode(registrationDto.password()))
+                .name(registrationDto.name())
                 .build();
         userRepository.save(newUser);
         final String accessToken = jwtProvider.generateAccessToken(newUser);
