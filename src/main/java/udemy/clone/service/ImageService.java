@@ -8,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 import udemy.clone.exception.UploadImageException;
 import udemy.clone.properties.MinioProperties;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -27,13 +26,8 @@ public class ImageService {
                         image.getOriginalFilename().lastIndexOf('.') + 1
                 );
         String fileName = UUID.randomUUID() + "." + fileExtension;
-        InputStream binaryImage;
         try {
-            binaryImage = image.getInputStream();
-        } catch (IOException e) {
-            throw new UploadImageException("Failed to load image, exception while getting input stream. " + e.getMessage());
-        }
-        try {
+            InputStream binaryImage = image.getInputStream();
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .stream(binaryImage, binaryImage.available(), -1)

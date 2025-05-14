@@ -27,7 +27,7 @@ public class LessonController {
 
     @PostMapping
     public LessonDto createLesson(@RequestPart("lessonDto") LessonCreateDto lessonDto,
-                                  @RequestParam("files") MultipartFile[] files) {
+                                  @RequestParam(value = "files", required = false) MultipartFile[] files) {
         return lessonService.createLesson(lessonDto, files);
     }
 
@@ -39,14 +39,14 @@ public class LessonController {
     @GetMapping("/students")
     public List<UserDto> findLessonsStudentsByProgress(
             @RequestParam(name = "lessonId") String lessonId,
-            @RequestParam(name = "status") LessonProgress.LessonStatus status) {
+            @RequestParam(name = "status") LessonProgress.Status status) {
         return lessonService.findLessonsStudentsByProgress(lessonId, status);
     }
 
     @GetMapping
     public List<LessonDto> findStudentsLessonsByProgress(
             @RequestParam(name = "userId") String userId,
-            @RequestParam(name = "status") LessonProgress.LessonStatus status) {
+            @RequestParam(name = "status") LessonProgress.Status status) {
         return lessonService.findStudentsLessonsByProgress(userId, status);
     }
 }

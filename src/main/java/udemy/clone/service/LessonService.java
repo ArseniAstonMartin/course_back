@@ -1,10 +1,12 @@
 package udemy.clone.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import udemy.clone.mapper.UserMapper;
 import udemy.clone.model.Course;
+import udemy.clone.model.User;
 import udemy.clone.model.user.UserDto;
 import udemy.clone.model.util.ContentBlock;
 import udemy.clone.model.util.LessonProgress;
@@ -27,7 +29,9 @@ public class LessonService {
     private final LessonMapper lessonMapper;
     private final UserMapper userMapper;
     private final ImageService imageService;
+    private final SecurityService securityService;
 
+    @PreAuthorize("hasRole('TEACHER') && principal.courseIds.contains(#lessonDto.getCourseId())")
     public LessonDto createLesson(LessonCreateDto lessonDto, MultipartFile[] files) {
         int fileIndex = 0;
         Course course = courseRepository.findById(lessonDto.getCourseId())
@@ -51,12 +55,15 @@ public class LessonService {
         return lessonMapper.toDto(savedLesson);
     }
 
-    public LessonDto findLessonById(String id) {
-        Lesson lesson = lessonRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Course not found by id: " + id));
+    @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT') && @securityService.canAccessLesson(#lessonId)") 
+    public LessonDto findLessonById(String lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new NoSuchElementException("Lesson not found by id: " + lessonId));
         return lessonMapper.toDto(lesson);
     }
 
-    public List<LessonDto> findStudentsLessonsByProgress(String userId, LessonProgress.LessonStatus status) {
+    @PreAuthorize("principal.id == #userId")
+    public List<LessonDto> findStudentsLessonsByProgress(String userId, LessonProgress.Status status) {
         return lessonRepository
                 .findStudentsLessonsByProgress(userId, status.name())
                 .stream()
@@ -64,10 +71,10 @@ public class LessonService {
                 .toList();
     }
 
-    public List<UserDto> findLessonsStudentsByProgress(String lessonId, LessonProgress.LessonStatus status) {
-        return lessonRepository
-                .findLessonsUsersByProgress(lessonId, status.name())
-                .stream()
+    @PreAuthorize("hasRole('TEACHER') && @securityService.canAccessLesson(#lessonId)")
+    public List<UserDto> findLessonsStudentsByProgress(String lessonId, LessonProgress.Status status) {
+        List<User> users = lessonRepository.findLessonsUsersByProgress(lessonId, status.toString());
+        return users.stream()
                 .map(userMapper::toDto)
                 .toList();
     }

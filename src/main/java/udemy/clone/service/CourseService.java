@@ -1,16 +1,20 @@
 package udemy.clone.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import udemy.clone.mapper.CourseMapper;
 import udemy.clone.mapper.LessonMapper;
 import udemy.clone.model.Course;
 import udemy.clone.model.Lesson;
+import udemy.clone.model.User;
 import udemy.clone.model.course.CourseCreateDto;
 import udemy.clone.model.course.CourseDto;
 import udemy.clone.model.lesson.LessonListDto;
 import udemy.clone.repository.CourseRepository;
 import udemy.clone.repository.LessonRepository;
+import udemy.clone.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +25,7 @@ import java.util.NoSuchElementException;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final LessonRepository lessonRepository;
+    private final UserRepository userRepository;
     private final CourseMapper courseMapper;
     private final LessonMapper lessonMapper;
 
@@ -30,18 +35,24 @@ public class CourseService {
     }
 
     public CourseDto findCourseDtoById(String id) {
-        Course course = findCourseById(id);
-        return courseMapper.toDto(course);
+        return courseMapper.toDto(findCourseById(id));
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
     public CourseDto createCourse(CourseCreateDto courseDto) {
-        var course = courseRepository.save(courseMapper.fromCreateDto(courseDto));
-        return courseMapper.toDto(course);
+        Course course = courseMapper.fromCreateDto(courseDto);
+        Course savedCourse = courseRepository.save(course);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var courses = user.getCourseIds();
+        courses = courses != null ? courses : new ArrayList<>();
+        courses.add(savedCourse.getId());
+        user.setCourseIds(courses);
+        userRepository.save(user);
+        return courseMapper.toDto(savedCourse);
     }
 
     public List<CourseDto> findAllCourses() {
-        return courseRepository.findAll()
-                .stream()
+        return courseRepository.findAll().stream()
                 .map(courseMapper::toDto)
                 .toList();
     }

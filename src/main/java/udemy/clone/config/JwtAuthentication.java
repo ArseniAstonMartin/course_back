@@ -12,29 +12,26 @@ import java.util.Collections;
 public class JwtAuthentication implements Authentication {
 
     private boolean authenticated;
-    private String name;
-    private String email;
-    private String id;
-    private User.Role role;
+    private User principal;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList((GrantedAuthority) () -> "ROLE_" + role.toString());
+        return Collections.singletonList((GrantedAuthority) () -> "ROLE_" + principal.getRole().toString());
     }
 
     @Override
     public Object getCredentials() {
-        return id;
+        return principal.getId();
     }
 
     @Override
     public Object getDetails() {
-        return id;
+        return principal.getId();
     }
 
     @Override
     public Object getPrincipal() {
-        return name;
+        return principal;
     }
 
     @Override
@@ -48,5 +45,7 @@ public class JwtAuthentication implements Authentication {
     }
 
     @Override
-    public String getName() { return name; }
+    public String getName() {
+        return principal.getName();
+    }
 }
