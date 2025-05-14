@@ -1,12 +1,15 @@
 package udemy.clone.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import udemy.clone.model.lesson.LessonCreateDto;
 import udemy.clone.model.lesson.LessonDto;
 import udemy.clone.model.user.UserDto;
@@ -15,6 +18,7 @@ import udemy.clone.service.LessonService;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/lessons")
 @RequiredArgsConstructor
@@ -22,8 +26,14 @@ public class LessonController {
     private final LessonService lessonService;
 
     @PostMapping
-    public LessonDto createLesson(@RequestBody LessonCreateDto lessonDto) {
-        return lessonService.createLesson(lessonDto);
+    public LessonDto createLesson(@RequestPart("lessonDto") LessonCreateDto lessonDto,
+                                  @RequestParam("files") MultipartFile[] files) {
+        return lessonService.createLesson(lessonDto, files);
+    }
+
+    @GetMapping("/{id}")
+    public LessonDto getLesson(@PathVariable String id) {
+        return lessonService.findLessonById(id);
     }
 
     @GetMapping("/students")
