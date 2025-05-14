@@ -10,9 +10,11 @@ import java.util.Collections;
 
 @Data
 public class JwtAuthentication implements Authentication {
-    private boolean isAuthenticated;
-    private Long accountId;
-    private String userName;
+
+    private boolean authenticated;
+    private String name;
+    private String email;
+    private String id;
     private User.Role role;
 
     @Override
@@ -22,31 +24,29 @@ public class JwtAuthentication implements Authentication {
 
     @Override
     public Object getCredentials() {
-        return accountId;
+        return id;
     }
 
     @Override
     public Object getDetails() {
-        return accountId;
+        return id;
     }
 
     @Override
     public Object getPrincipal() {
-        return userName;
+        return name;
     }
 
     @Override
     public boolean isAuthenticated() {
-        return this.isAuthenticated;
+        return authenticated;
     }
 
     @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-        this.isAuthenticated = isAuthenticated;
+        this.authenticated = isAuthenticated;
     }
 
     @Override
-    public String getName() {
-        return userName;
-    }
+    public String getName() { return name; }
 }
