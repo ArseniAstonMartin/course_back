@@ -15,5 +15,7 @@ public interface LessonMapper {
 
     LessonDto toDto(Lesson lesson);
 
+    LessonListDto toListDto(Lesson lesson);
+
     List<LessonListDto> toListDtoList(List<Lesson> lessons);
 }

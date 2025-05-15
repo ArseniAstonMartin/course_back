@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import udemy.clone.model.User;
+import udemy.clone.repository.UserRepository;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
@@ -16,16 +17,22 @@ import java.util.Date;
 @Slf4j
 @Component
 public class JwtProvider {
-    private static final String ACCOUNT_ID = "accountId";
+    private static final String USER_ID = "userId";
     private static final String USER_NAME = "userName";
-    private static final String EMAIL = "email";
+    private static final String USER_EMAIL = "userEmail";
+    private static final String USER_ROLE = "userRole";
+
     private final SecretKey jwtAccessSecret;
     private final int expirationInMinutes;
+    private final UserRepository userRepository;
 
-    public JwtProvider(@Value("${jwt.secret-key}") String jwtAccessSecret,
-                       @Value("${jwt.expiration}") int expirationInMinutes) {
+    public JwtProvider(
+            @Value("${jwt.secret-key}") String jwtAccessSecret,
+            @Value("${jwt.expiration}") int expirationInMinutes,
+            UserRepository userRepository) {
         this.jwtAccessSecret = Keys.hmacShaKeyFor(jwtAccessSecret.getBytes());
         this.expirationInMinutes = expirationInMinutes;
+        this.userRepository = userRepository;
     }
 
     public String generateAccessToken(User user) {
@@ -33,12 +40,13 @@ public class JwtProvider {
                 .plusMinutes(expirationInMinutes).atZone(ZoneId.systemDefault()).toInstant();
         final Date accessExpiration = Date.from(accessExpirationInstant);
         return Jwts.builder()
-                .setSubject("JWT Auth token")
+                .setSubject(user.getId())
                 .setExpiration(accessExpiration)
                 .signWith(jwtAccessSecret, SignatureAlgorithm.HS256)
-                .claim(ACCOUNT_ID, user.getId())
+                .claim(USER_ID, user.getId())
                 .claim(USER_NAME, user.getName())
-                .claim(EMAIL, user.getEmail())
+                .claim(USER_EMAIL, user.getEmail())
+                .claim(USER_ROLE, user.getRole().toString())
                 .compact();
     }
 
@@ -72,10 +80,11 @@ public class JwtProvider {
     }
 
     public JwtAuthentication generateJwtAuthentication(Claims claims) {
-        final JwtAuthentication jwtAuthentication = new JwtAuthentication();
-        jwtAuthentication.setId(claims.get(ACCOUNT_ID, String.class));
-        jwtAuthentication.setName(claims.get(USER_NAME, String.class));
-        jwtAuthentication.setEmail(claims.get(EMAIL, String.class));
-        return jwtAuthentication;
+        final JwtAuthentication jwtInfoToken = new JwtAuthentication();
+        String userId = claims.get(USER_ID, String.class);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found by id: " + userId));
+        jwtInfoToken.setPrincipal(user);
+        return jwtInfoToken;
     }
 }
