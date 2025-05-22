@@ -17,9 +17,17 @@ dependencies {
      */
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
-    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("org.springframework.boot:spring-boot-starter-security")
+
+    /**
+     * ElasticSearch
+     */
+    implementation("co.elastic.clients:elasticsearch-java:9.0.1")
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.4.4")
+    implementation("org.apache.httpcomponents.core5:httpcore5:5.3.4")
+    implementation("org.apache.httpcomponents.core5:httpcore5-h2:5.3.4")
+
 
     /**
      * Amazon S3

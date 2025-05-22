@@ -47,7 +47,7 @@ services:
       - ME_CONFIG_MONGODB_SERVER=mongodb
 
   elasticsearch:
-    image: elasticsearch:8.18.0
+    image: elasticsearch:9.0.1
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
