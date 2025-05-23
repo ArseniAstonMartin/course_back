@@ -45,6 +45,8 @@ spring:
         spring.json.add.type.headers: false
       invitation-send:
         topic: "invitation-send"
+      invitation-accept:
+        topic: "invitation-accept"
 
     consumer:
       auto-offset-reset: earliest
@@ -57,6 +59,8 @@ spring:
     topics:
       invitation-send:
         name: "invitation_send"
+      invitation-accept:
+        topic: "invitation-accept"
 
 server:
   port: 8080

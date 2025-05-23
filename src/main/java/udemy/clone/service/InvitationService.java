@@ -1,8 +1,6 @@
 package udemy.clone.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -13,13 +11,13 @@ import udemy.clone.model.Course;
 import udemy.clone.model.Invitation;
 import udemy.clone.model.User;
 import udemy.clone.model.enums.InvitationStatus;
-import udemy.clone.model.event.InvitationEvent;
+import udemy.clone.model.event.SendInvitationEvent;
 import udemy.clone.model.invitations.InvitationDto;
 import udemy.clone.producer.InvitationEventPublisher;
 import udemy.clone.repository.InvitationRepository;
 import udemy.clone.validators.InvitationValidator;
 
-import java.util.Optional;
+import java.util.List;
 
 import static java.time.LocalDateTime.now;
 
@@ -39,7 +37,7 @@ public class InvitationService {
                 .orElseThrow(() -> new EntityNotFoundException("Invitation with id " + id + " not found"));
     }
 
-    //@PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('TEACHER')")
     @Transactional
     public InvitationDto sendInvitation(InvitationDto invitationDto) {
         Course course = courseService.findCourseById(invitationDto.getCourseId());
@@ -92,7 +90,10 @@ public class InvitationService {
     }
 
     private void sendEvent(Course course, User recipient, User sender) {
-        InvitationEvent event = new InvitationEvent(course.getTitle(), recipient.getName(), sender.getName());
+        SendInvitationEvent event = new SendInvitationEvent(course.getTitle(), recipient.getName(), sender.getName());
         invitationEventPublisher.publish(event);
+    }
+    private void addInvitationToList(User teacher, Invitation invitation) {
+        teacher.setInvitationsIds(List.of(invitation.getId()));
     }
 }
