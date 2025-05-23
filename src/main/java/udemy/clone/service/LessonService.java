@@ -78,4 +78,8 @@ public class LessonService {
                 .map(userMapper::toDto)
                 .toList();
     }
+
+    public List<LessonProgress> findLessonsProgressByLCourseId(String lessonId) {
+
+    }
 }
