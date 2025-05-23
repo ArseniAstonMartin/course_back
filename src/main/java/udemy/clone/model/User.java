@@ -19,6 +19,7 @@ public class User {
     private String name;
     private String email;
     private Role role;
+    private List<String> invitationsIds;
     private List<String> courseIds; // for student - means bought, for teacher - means created
     private List<LessonProgress> lessonProgress; // student only
     private String password;

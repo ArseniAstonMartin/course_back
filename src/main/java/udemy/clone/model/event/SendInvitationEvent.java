@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class InvitationEvent {
+public class SendInvitationEvent {
     private String courseId;
+    private String invitedId;
     private String invitedName;
+    private String teacherId;
     private String teacherName;
 }
