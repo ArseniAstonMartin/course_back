@@ -25,22 +25,6 @@ import static co.elastic.clients.elasticsearch._types.query_dsl.LikeBuilders.doc
 public class ElasticController {
     private final ElasticsearchClient esClient;
 
-    @PostMapping("/post")
-    @PreAuthorize("isAnonymous()")
-    public List<Object> createCourse(@RequestBody CourseCreateDto courseDto) {
-        IndexResponse response = null;
-        try {
-            response = esClient.index(i -> i
-                    .index("courses")
-                    .id(UUID.randomUUID().toString())
-                    .document(courseDto)
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return List.of(response, response.id(), response.index(), response.toString(), response.result());
-    }
-
     @GetMapping("/get")
     @PreAuthorize("isAnonymous()")
     public List<Object> getObjects() {
