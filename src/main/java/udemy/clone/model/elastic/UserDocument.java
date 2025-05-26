@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import udemy.clone.model.User;
 
 import java.util.List;
 
@@ -11,9 +12,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CourseElastic {
+public class UserDocument {
     private String id;
-    private String title;
-    private String description;
-    private List<LessonElastic> lessons;
+    private String name;
+    private String email;
+    private User.Role role;
+    private List<String> courseIds;
 }

@@ -13,31 +13,31 @@ public class ElasticsearchConfig {
     public ElasticsearchClient elasticsearchClient() throws IOException {
         ElasticsearchClient client = ElasticsearchClient.of(b -> b.host("http://localhost:9200"));
 
-
         if (!client.indices().exists(e -> e.index("courses")).value()) {
             CreateIndexRequest request = new CreateIndexRequest.Builder()
                     .index("courses")
                     .mappings(m -> m
-                                    .properties("name", p -> p.keyword(k -> k))
-                                    .properties("", p -> p.nested(k -> k))
-                                    .properties("", p -> p.double_(d -> d))
-                                    .properties("", p -> p.text(t -> t))
-                            // TO-DO: Define all fields
+                            .properties("id", p -> p.keyword(k -> k))
+                            .properties("imageSource", p -> p.keyword(k -> k))
+                            .properties("title", p -> p.text(t -> t))
+                            .properties("description", p -> p.text(t -> t))
+                            .properties("teacherId", p -> p.keyword(k -> k))
                     ).build();
             client.indices().create(request);
         }
 
-        if (!client.indices().exists(e -> e.index("users")).value()) {
+        if (!client.indices().exists(e -> e.index("teachers")).value()) {
             CreateIndexRequest request = new CreateIndexRequest.Builder()
-                    .index("users")
+                    .index("teachers")
                     .mappings(m -> m
-                                    .properties("name", p -> p.keyword(k -> k))
-                                    .properties("", p -> p.nested(k -> k))
-                            // TO-DO: Define all fields
+                            .properties("id", p -> p.keyword(k -> k))
+                            .properties("name", p -> p.keyword(k -> k))
+                            .properties("email", p -> p.keyword(k -> k))
+                            .properties("role", p -> p.keyword(k -> k))
+                            .properties("courseIds", p -> p.keyword(k -> k))
                     ).build();
             client.indices().create(request);
         }
-
         return client;
     }
 }

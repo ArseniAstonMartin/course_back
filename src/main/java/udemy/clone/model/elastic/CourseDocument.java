@@ -5,13 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserElastic {
+public class CourseDocument {
     private String id;
-    private List<String> courseIds;
+    private String imageSource;
+    private String title;
+    private String description;
+    private String teacherId;
 }

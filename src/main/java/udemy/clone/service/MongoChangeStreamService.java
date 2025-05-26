@@ -10,10 +10,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.springframework.stereotype.Service;
+import udemy.clone.model.User;
+import udemy.clone.model.elastic.CourseDocument;
+import udemy.clone.model.elastic.UserDocument;
 
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -23,39 +27,60 @@ public class MongoChangeStreamService {
     private final ElasticService esSyncService;
     private final ExecutorService executorService = Executors.newFixedThreadPool(3);
 
-    private final List<String> collections = List.of("user", "courses");
+    private final Map<String, Consumer<Document>> collections = Map.of(
+            "users", this::processUserDocument,
+            "courses", this::processCourseDocument
+    );
 
     @PostConstruct
     public void init() {
-        for (String collectionName : collections) {
-            executorService.submit(() -> watchChanges(collectionName));
+        for (Map.Entry<String, Consumer<Document>> entry : collections.entrySet()) {
+            executorService.submit(() -> watchChanges(entry.getKey(), entry.getValue()));
         }
     }
 
-    private void watchChanges(String collectionName) {
-        log.info("I AM HERE 0");
+    private void watchChanges(String collectionName, Consumer<Document> documentProcessor) {
         MongoDatabase database = mongoClient.getDatabase("studybel");
         MongoCollection<Document> collection = database.getCollection(collectionName);
-        var a = collection.watch();
-        try (MongoCursor<ChangeStreamDocument<Document>> cursor = a.iterator()) {
-            log.info("I AM HERE 1");
+        try (MongoCursor<ChangeStreamDocument<Document>> cursor = collection.watch().iterator()) {
             while (cursor.hasNext()) {
                 ChangeStreamDocument<Document> change = cursor.next();
-                log.info("I AM HERE 2");
-                executorService.submit(() -> handleSync(change.getFullDocument(), collectionName));
+                executorService.submit(() -> documentProcessor.accept(change.getFullDocument()));
             }
         }
     }
 
-    private void handleSync(Document change, String indexName) {
-        try {
-            if ("delete".equals(change.getString("operationType"))) {
-                esSyncService.deleteDocument(change, indexName);
-            } else {
-                esSyncService.indexDocument(change, indexName);
-            }
-        } catch (Exception e) {
-            log.info(e.getMessage(), e.getCause(), e.getStackTrace());
+    private void processUserDocument(Document user) {
+        if (user.get("role").equals(User.Role.STUDENT.toString())) {
+            return;
         }
+        if ("delete".equals(user.getString("operationType"))) {
+            esSyncService.deleteDocument(user, "courses");
+        }
+        log.info("I AM HERE");
+        UserDocument userDocument = UserDocument.builder()
+                .id(user.get("_id").toString())
+                .name(user.getString("name"))
+                .email(user.getString("email"))
+                .role(User.Role.valueOf(user.getString("role")))
+                .courseIds(user.getList("courseIds", String.class))
+                .build();
+        esSyncService.indexTeacher(userDocument);
+    }
+
+    private void processCourseDocument(Document course) {
+        log.info("Processing document {}", course.toJson());
+        if ("delete".equals(course.getString("operationType"))) {
+            esSyncService.deleteDocument(course, "courses");
+        }
+        String courseId = course.get("_id").toString();
+        CourseDocument courseDocument = CourseDocument.builder()
+                .id(courseId)
+                .imageSource("minio-source-for-image") //TO-DO
+                .title(course.getString("title"))
+                .description(course.getString("description"))
+                .teacherId(course.getString("teacherId"))
+                .build();
+        esSyncService.indexCourse(courseDocument);
     }
 }
