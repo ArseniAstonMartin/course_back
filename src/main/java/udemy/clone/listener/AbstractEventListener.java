@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import udemy.clone.messaging.MessageBuilder;
-import udemy.clone.model.User;
 import udemy.clone.model.user.UserDto;
 import udemy.clone.notification.NotificationService;
 import udemy.clone.service.UserService;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -35,5 +33,4 @@ public class AbstractEventListener <T> {
                 .send(user, message);
 
     }
-
 }

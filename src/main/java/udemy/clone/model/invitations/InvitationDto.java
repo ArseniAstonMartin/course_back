@@ -12,10 +12,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class InvitationDto {
     private String id;
-    @NotNull(message = "You have not specified the course you want to invite")
     @NotBlank(message = "You have not specified the course you want to invite")
     private String courseId;
-    @NotNull
+
     private InvitationStatus status;
     @NotNull
     @NotBlank

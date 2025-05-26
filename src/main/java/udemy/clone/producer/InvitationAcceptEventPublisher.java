@@ -19,4 +19,9 @@ public class InvitationAcceptEventPublisher implements EventPublisher<AcceptInvi
         invitationAcceptProducer.send(TOPIC, event);
         log.info("Published invitation event: {}", event.getClass().getName());
     }
+
+    @Override
+    public Class<?> getInstance() {
+        return AcceptInvitationEvent.class;
+    }
 }

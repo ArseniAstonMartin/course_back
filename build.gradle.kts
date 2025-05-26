@@ -21,7 +21,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-mail:3.4.2")
-    implementation("org.springframework.boot:spring-boot-starter-mail:3.0.6")
 
     /**
      * ElasticSearch

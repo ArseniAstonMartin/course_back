@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AcceptInvitationEvent {
     private String courseId;
+    private String courseTitle;
     private String invitedName;
     private String invitedId;
     private String teacherName;

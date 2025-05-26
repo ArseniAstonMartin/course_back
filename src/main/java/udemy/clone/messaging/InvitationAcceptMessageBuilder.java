@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import udemy.clone.model.event.AcceptInvitationEvent;
-import udemy.clone.producer.InvitationAcceptEventPublisher;
 
 import java.util.Locale;
 

@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import udemy.clone.model.invitations.InvitationDto;
 import udemy.clone.service.InvitationService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/invitations")
 @RequiredArgsConstructor
@@ -27,9 +29,13 @@ public class InvitationController {
         return invitationService.rejectInvitation(invitationId);
     }
 
-    @DeleteMapping("/delete/{invitationId}")
+    @DeleteMapping("/{invitationId}")
     public void cancelInvitation(@PathVariable String invitationId) {
         invitationService.cancelInvitation(invitationId);
     }
 
+    @GetMapping ("/me")
+    public List<InvitationDto> getMyInvitations () {
+        return invitationService.getMyInvitations();
+    }
 }

@@ -1,6 +1,8 @@
 package udemy.clone.exceptions;
 
-public class EntityNotFoundException extends RuntimeException {
+import java.util.NoSuchElementException;
+
+public class EntityNotFoundException extends NoSuchElementException {
     public EntityNotFoundException(String message) {
         super(message);
     }

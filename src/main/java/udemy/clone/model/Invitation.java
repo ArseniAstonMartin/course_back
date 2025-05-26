@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
 public class Invitation {
     @Id
     private String id;
-    private Course course;
+    private String courseId;
     private InvitationStatus status;
-    private User sender;
-    private User recipient;
+    private String senderId;
+    private String recipientId;
     private LocalDateTime createdAt;
 
 }
