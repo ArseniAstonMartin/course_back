@@ -52,9 +52,6 @@ public class ElasticService {
     }
 
     public void indexTeacher(UserDocument user) {
-        if (user == null || user.getRole().equals(User.Role.STUDENT)) {
-            return;
-        }
         try {
             esClient.index(i -> i
                     .index("teachers")

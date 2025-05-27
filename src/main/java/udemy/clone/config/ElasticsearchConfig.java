@@ -18,10 +18,10 @@ public class ElasticsearchConfig {
                     .index("courses")
                     .mappings(m -> m
                             .properties("id", p -> p.keyword(k -> k))
-                            .properties("imageSource", p -> p.keyword(k -> k))
                             .properties("title", p -> p.text(t -> t))
                             .properties("description", p -> p.text(t -> t))
                             .properties("teacherId", p -> p.keyword(k -> k))
+                            .properties("filename", p -> p.keyword(k -> k))
                     ).build();
             client.indices().create(request);
         }
@@ -33,8 +33,7 @@ public class ElasticsearchConfig {
                             .properties("id", p -> p.keyword(k -> k))
                             .properties("name", p -> p.keyword(k -> k))
                             .properties("email", p -> p.keyword(k -> k))
-                            .properties("role", p -> p.keyword(k -> k))
-                            .properties("courseIds", p -> p.keyword(k -> k))
+                            .properties("filename", p -> p.keyword(k -> k))
                     ).build();
             client.indices().create(request);
         }

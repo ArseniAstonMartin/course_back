@@ -22,6 +22,7 @@ public class User {
     private List<String> courseIds; // for student - means bought, for teacher - means created
     private List<LessonProgress> lessonProgress; // student only
     private String password;
+    private String filename;
 
     public enum Role {
         TEACHER, STUDENT

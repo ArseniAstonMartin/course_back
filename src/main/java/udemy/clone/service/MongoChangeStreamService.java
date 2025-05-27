@@ -57,13 +57,11 @@ public class MongoChangeStreamService {
         if ("delete".equals(user.getString("operationType"))) {
             esSyncService.deleteDocument(user, "courses");
         }
-        log.info("I AM HERE");
         UserDocument userDocument = UserDocument.builder()
                 .id(user.get("_id").toString())
                 .name(user.getString("name"))
                 .email(user.getString("email"))
-                .role(User.Role.valueOf(user.getString("role")))
-                .courseIds(user.getList("courseIds", String.class))
+                .filename(user.getString("filename"))
                 .build();
         esSyncService.indexTeacher(userDocument);
     }
@@ -76,10 +74,10 @@ public class MongoChangeStreamService {
         String courseId = course.get("_id").toString();
         CourseDocument courseDocument = CourseDocument.builder()
                 .id(courseId)
-                .imageSource("minio-source-for-image") //TO-DO
                 .title(course.getString("title"))
                 .description(course.getString("description"))
                 .teacherId(course.getString("teacherId"))
+                .filename(course.getString("filename"))
                 .build();
         esSyncService.indexCourse(courseDocument);
     }

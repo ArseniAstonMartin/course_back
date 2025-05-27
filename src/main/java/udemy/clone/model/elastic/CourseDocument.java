@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CourseDocument {
     private String id;
-    private String imageSource;
     private String title;
     private String description;
     private String teacherId;
+    private String filename;
 }

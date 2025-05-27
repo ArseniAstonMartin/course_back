@@ -3,6 +3,7 @@ package udemy.clone.service;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import udemy.clone.exception.UploadImageException;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ImageService {
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
@@ -36,8 +38,22 @@ public class ImageService {
                             .build()
             );
         } catch (Exception e) {
+            log.error("Exception when uploading image {}", e.getMessage());
             throw new UploadImageException("Failed to load image, exception putting to file storage . " + e.getMessage());
         }
         return fileName;
+    }
+
+    public void deleteImage(String filename) {
+        try {
+            minioClient.removeObject(
+                io.minio.RemoveObjectArgs.builder()
+                    .bucket(minioProperties.getBucket())
+                    .object(filename)
+                    .build()
+            );
+        } catch (Exception e) {
+            throw new UploadImageException("Failed to delete image, exception removing from file storage. " + e.getMessage());
+        }
     }
 }

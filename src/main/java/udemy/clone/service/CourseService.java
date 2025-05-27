@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import udemy.clone.mapper.CourseMapper;
 import udemy.clone.mapper.LessonMapper;
 import udemy.clone.model.Course;
@@ -28,6 +29,7 @@ public class CourseService {
     private final UserRepository userRepository;
     private final CourseMapper courseMapper;
     private final LessonMapper lessonMapper;
+    private final ImageService imageService;
 
     public Course findCourseById(String id) {
         return courseRepository.findById(id)
@@ -39,8 +41,11 @@ public class CourseService {
     }
 
     @PreAuthorize("hasRole('TEACHER')")
-    public CourseDto createCourse(CourseCreateDto courseDto) {
+    public CourseDto createCourse(CourseCreateDto courseDto, MultipartFile courseImage) {
         Course course = courseMapper.fromCreateDto(courseDto);
+        if (courseImage != null) {
+            course.setFilename(imageService.upload(courseImage));
+        }
         Course savedCourse = courseRepository.save(course);
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         var courses = user.getCourseIds();
@@ -66,5 +71,15 @@ public class CourseService {
                 .map(lessonId -> lessonRepository.findById(lessonId).orElseThrow())
                 .toList();
         return lessonMapper.toListDtoList(lessons);
+    }
+
+    public CourseDto uploadCourseImage(String id, MultipartFile image) {
+        Course course = findCourseById(id);
+        if (course.getFilename() != null) {
+            imageService.deleteImage(course.getFilename());
+        }
+        course.setFilename(imageService.upload(image));
+        Course savedCourse = courseRepository.save(course);
+        return courseMapper.toDto(savedCourse);
     }
 }
