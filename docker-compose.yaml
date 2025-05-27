@@ -25,15 +25,21 @@ services:
       "
 
   mongodb:
-    image: mongo
+    image: mongo:latest
     container_name: mongodb
+    command: [ "/bin/sh", "-c", "openssl rand -base64 756 > /data/db/mongo-keyfile && chmod 400 /data/db/mongo-keyfile && exec mongod --auth --replSet rs0 --bind_ip_all --keyFile /data/db/mongo-keyfile" ]
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongouser
       - MONGO_INITDB_ROOT_PASSWORD=mongopassword
     ports:
-      - 27017:27017
+      - "27017:27017"
     volumes:
-      - db-data:/db-data
+      - db-data:/data/db
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017'}]}) }" ]
+      interval: 5s
+      timeout: 30s
+      retries: 10
 
   mongo-express:
     image: mongo-express
@@ -47,7 +53,7 @@ services:
       - ME_CONFIG_MONGODB_SERVER=mongodb
 
   elasticsearch:
-    image: elasticsearch:8.18.0
+    image: elasticsearch:9.0.1
     container_name: elasticsearch
     environment:
       - discovery.type=single-node

@@ -12,6 +12,7 @@ public interface JwtMapper {
         return JwtResponseDto.builder()
                 .token(token)
                 .name(user.getName())
+                .role(user.getRole())
                 .email(user.getEmail())
                 .build();
     }

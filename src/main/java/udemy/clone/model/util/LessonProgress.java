@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LessonProgress {
     private String lessonId;
+    private String studentId;
     private Status status;
 
     public enum Status {
