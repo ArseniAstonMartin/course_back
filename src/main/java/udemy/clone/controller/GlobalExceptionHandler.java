@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException ex) {
-        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body("Файл слишком большой! Попробуйте другой");
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body("Файл слишком большой! Попробуйте другой" + ex.getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)

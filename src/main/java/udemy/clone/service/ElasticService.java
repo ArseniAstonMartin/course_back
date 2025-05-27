@@ -20,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import udemy.clone.model.User;
 import udemy.clone.model.elastic.CourseDocument;
 import udemy.clone.model.elastic.UserDocument;
 
