@@ -32,4 +32,9 @@ public class UserService {
         User savedUser = userRepository.save(user);
         return userMapper.toDto(savedUser);
     }
+
+    public UserDto getCurrentUser() {
+        String id = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+        return userMapper.toDto(findById(id));
+    }
 }
