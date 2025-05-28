@@ -1,13 +1,17 @@
 package udemy.clone.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import udemy.clone.model.user.UserDto;
+import udemy.clone.model.user.UserUpdateDto;
 import udemy.clone.service.UserService;
 
 @RestController
@@ -24,5 +28,11 @@ public class UserController {
     @GetMapping
     public UserDto getCurrentUser() {
         return userService.getCurrentUser();
+    }
+
+    @PutMapping
+    @ResponseStatus(HttpStatus.OK)
+    public UserDto updateProfile(@RequestBody UserUpdateDto userDto) {
+        return userService.update(userDto);
     }
 }

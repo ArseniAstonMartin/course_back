@@ -12,6 +12,7 @@ import udemy.clone.model.Lesson;
 import udemy.clone.model.User;
 import udemy.clone.model.course.CourseCreateDto;
 import udemy.clone.model.course.CourseDto;
+import udemy.clone.model.course.CourseUpdateDto;
 import udemy.clone.model.lesson.LessonListDto;
 import udemy.clone.repository.CourseRepository;
 import udemy.clone.repository.LessonRepository;
@@ -86,5 +87,11 @@ public class CourseService {
     public List<CourseDto> findMyCourses() {
         String userId = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         return courseRepository.findByTeacherId(userId).stream().map(courseMapper::toDto).toList();
+    }
+
+    public CourseDto update(CourseUpdateDto courseDto) {
+        Course course = findCourseById(courseDto.getId());
+        courseMapper.update(course, courseDto);
+        return courseMapper.toDto(courseRepository.save(course));
     }
 }

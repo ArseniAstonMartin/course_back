@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import udemy.clone.mapper.UserMapper;
 import udemy.clone.model.User;
 import udemy.clone.model.user.UserDto;
+import udemy.clone.model.user.UserUpdateDto;
 import udemy.clone.repository.UserRepository;
 
 import java.util.NoSuchElementException;
@@ -36,5 +37,12 @@ public class UserService {
     public UserDto getCurrentUser() {
         String id = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         return userMapper.toDto(findById(id));
+    }
+
+    public UserDto update(UserUpdateDto userDto) {
+        String id = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+        User user = findById(id);
+        userMapper.update(user, userDto);
+        return userMapper.toDto(userRepository.save(user));
     }
 }

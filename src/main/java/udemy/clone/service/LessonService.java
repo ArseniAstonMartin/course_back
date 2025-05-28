@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import udemy.clone.mapper.UserMapper;
 import udemy.clone.model.Course;
 import udemy.clone.model.User;
+import udemy.clone.model.lesson.LessonUpdateDto;
 import udemy.clone.model.user.UserDto;
 import udemy.clone.model.util.ContentBlock;
 import udemy.clone.model.util.LessonProgress;
@@ -30,6 +31,11 @@ public class LessonService {
     private final UserMapper userMapper;
     private final ImageService imageService;
     private final SecurityService securityService;
+
+    private Lesson findLessonById(String lessonId) {
+        return lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new NoSuchElementException("Lesson not found by id: " + lessonId));
+    }
 
     @PreAuthorize("hasRole('TEACHER') && principal.courseIds.contains(#lessonDto.getCourseId())")
     public LessonDto createLesson(LessonCreateDto lessonDto, MultipartFile[] files) {
@@ -56,10 +62,8 @@ public class LessonService {
     }
 
     @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT') && @securityService.canAccessLesson(#lessonId)") 
-    public LessonDto findLessonById(String lessonId) {
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new NoSuchElementException("Lesson not found by id: " + lessonId));
-        return lessonMapper.toDto(lesson);
+    public LessonDto findLessonDtoById(String lessonId) {
+        return lessonMapper.toDto(findLessonById(lessonId));
     }
 
     @PreAuthorize("principal.id == #userId")
@@ -77,5 +81,33 @@ public class LessonService {
         return users.stream()
                 .map(userMapper::toDto)
                 .toList();
+    }
+
+    @PreAuthorize("hasRole('TEACHER') && @securityService.canAccessLesson(#lessonId)")
+    public LessonDto updateLesson(LessonUpdateDto lessonDto, MultipartFile[] files) {
+        Lesson lesson = findLessonById(lessonDto.getId());
+        lessonMapper.update(lesson, lessonDto);
+        int fileIndex = 0;
+        for (ContentBlock block : lessonDto.getContent()) {
+            var type = block.getContentType();
+            if (type == ContentBlock.ContentType.IMAGE || type == ContentBlock.ContentType.VIDEO) {
+                if (block.getContent() == null) {
+                    block.setContent(imageService.upload(files[fileIndex]));
+                    fileIndex++;
+                }
+            }
+        }
+        return lessonMapper.toDto(lessonRepository.save(lesson));
+    }
+
+    @PreAuthorize("hasRole('TEACHER') && @securityService.canAccessLesson(#lessonId)")
+    public void deleteLesson(String id) {
+        Lesson lesson = findLessonById(id);
+        String courseId = lesson.getCourseId();
+        // TO-DO: delete all lessonProgress
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        course.getLessonIds().remove(id);
+        courseRepository.save(course);
+        lessonRepository.deleteById(id);
     }
 }

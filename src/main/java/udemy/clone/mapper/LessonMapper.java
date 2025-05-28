@@ -1,11 +1,13 @@
 package udemy.clone.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 import udemy.clone.model.Lesson;
 import udemy.clone.model.lesson.LessonCreateDto;
 import udemy.clone.model.lesson.LessonDto;
 import udemy.clone.model.lesson.LessonListDto;
+import udemy.clone.model.lesson.LessonUpdateDto;
 
 import java.util.List;
 
@@ -18,4 +20,6 @@ public interface LessonMapper {
     LessonListDto toListDto(Lesson lesson);
 
     List<LessonListDto> toListDtoList(List<Lesson> lessons);
+
+    void update(@MappingTarget Lesson lesson, LessonUpdateDto lessonUpdateDto);
 }
