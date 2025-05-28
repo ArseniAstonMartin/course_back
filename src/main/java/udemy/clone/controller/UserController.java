@@ -22,7 +22,7 @@ public class UserController {
     }
 
     @GetMapping
-    public UserDto uploadAvatar() {
+    public UserDto getCurrentUser() {
         return userService.getCurrentUser();
     }
 }
