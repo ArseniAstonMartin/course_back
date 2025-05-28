@@ -21,6 +21,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
 
     /**
+     * Aspect Oriented Programming
+     */
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+
+    /**
      * ElasticSearch
      */
     implementation("co.elastic.clients:elasticsearch-java:9.0.1")

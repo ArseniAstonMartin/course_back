@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -23,6 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class ImageService {
     private static final int SQUARE_SIZE = 680;
+    private static final Set<String> IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "bmp", "webp");
 
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
@@ -34,13 +36,20 @@ public class ImageService {
         String fileExtension = image.getOriginalFilename()
                 .substring(
                         image.getOriginalFilename().lastIndexOf('.') + 1
-                );
+                ).toLowerCase();
         String fileName = UUID.randomUUID() + "." + fileExtension;
         try {
-            InputStream resizedImage = resizeImage(image.getInputStream(), fileExtension);
+            InputStream uploadStream;
+            if (IMAGE_EXTENSIONS.contains(fileExtension)) {
+                log.info("Uploading image file: {}", image.getOriginalFilename());
+                uploadStream = resizeImage(image.getInputStream(), fileExtension);
+            } else {
+                log.info("Uploading non-image file (likely video): {}", image.getOriginalFilename());
+                uploadStream = image.getInputStream();
+            }
             minioClient.putObject(
                     PutObjectArgs.builder()
-                            .stream(resizedImage, resizedImage.available(), -1)
+                            .stream(uploadStream, uploadStream.available(), -1)
                             .bucket(minioProperties.getBucket())
                             .object(fileName)
                             .build()
@@ -85,5 +94,4 @@ public class ImageService {
         ImageIO.write(resizedImage, fileExtension, os);
         return new ByteArrayInputStream(os.toByteArray());
     }
-
 }
