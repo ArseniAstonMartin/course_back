@@ -6,10 +6,12 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import udemy.clone.model.course.CourseCreateDto;
 import udemy.clone.model.course.CourseDto;
 import udemy.clone.model.lesson.LessonListDto;
@@ -44,7 +46,15 @@ public class CourseController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CourseDto createCourse(@RequestBody CourseCreateDto courseDto) {
-        return courseService.createCourse(courseDto);
+    public CourseDto createCourse(@RequestPart CourseCreateDto courseDto,
+                                  @RequestPart(required = false, name = "image") MultipartFile courseImage) {
+        return courseService.createCourse(courseDto, courseImage);
+    }
+
+    @PutMapping("/{id}/image")
+    @ResponseStatus(HttpStatus.OK)
+    public CourseDto uploadCourseImage(@PathVariable(name = "id") String id,
+                                       @RequestPart(name = "image") MultipartFile image) {
+        return courseService.uploadCourseImage(id, image);
     }
 }

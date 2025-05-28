@@ -1,5 +1,7 @@
 package udemy.clone.config;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,12 +19,10 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
-
-    public SecurityConfig(JwtFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -42,8 +42,26 @@ public class SecurityConfig {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        log.error("[SECURITY] AuthenticationEntryPoint triggered: {} {} | Reason: {}", request.getMethod(), request.getRequestURI(), authException.getMessage(), authException);
+                        response.setStatus(401);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"error\": \"Unauthorized: " + authException.getMessage() + "\"}");
+                    })
+                    .accessDeniedHandler((request, response, accessDeniedException) -> {
+                        log.error("[SECURITY] AccessDeniedHandler triggered: {} {} | Reason: {}", request.getMethod(), request.getRequestURI(), accessDeniedException.getMessage(), accessDeniedException);
+                        response.setStatus(403);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"error\": \"Forbidden: " + accessDeniedException.getMessage() + "\"}");
+                    })
+                )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/registration", "/courses/{id}", "/courses/all", "/search/*").permitAll()
+                        .requestMatchers(
+                                "/auth/login", "/auth/registration",
+                                "/courses/{id}", "/courses/all", "/search/*",
+                                "/error", "/error/*"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

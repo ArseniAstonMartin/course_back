@@ -15,4 +15,5 @@ public class Course {
     private String description;
     private String teacherId;
     private List<String> lessonIds;
+    private String filename;
 }
