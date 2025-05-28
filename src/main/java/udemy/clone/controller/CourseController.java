@@ -44,6 +44,12 @@ public class CourseController {
         return courseService.findCourseLessonsById(id);
     }
 
+    @GetMapping("/my")
+    @ResponseStatus(HttpStatus.OK)
+    public List<CourseDto> findMyCourses() {
+        return courseService.findMyCourses();
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CourseDto createCourse(@RequestPart CourseCreateDto courseDto,
@@ -57,4 +63,6 @@ public class CourseController {
                                        @RequestPart(name = "image") MultipartFile image) {
         return courseService.uploadCourseImage(id, image);
     }
+
+
 }

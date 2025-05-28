@@ -82,4 +82,9 @@ public class CourseService {
         Course savedCourse = courseRepository.save(course);
         return courseMapper.toDto(savedCourse);
     }
+
+    public List<CourseDto> findMyCourses() {
+        String userId = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+        return courseRepository.findByTeacherId(userId).stream().map(courseMapper::toDto).toList();
+    }
 }
