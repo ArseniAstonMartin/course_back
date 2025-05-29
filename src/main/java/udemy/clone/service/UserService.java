@@ -3,6 +3,7 @@ package udemy.clone.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import udemy.clone.exceptions.EntityNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 import udemy.clone.mapper.UserMapper;
 import udemy.clone.model.User;
@@ -20,6 +21,15 @@ public class UserService {
 
     public User findById(String id) {
         return userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User not found, ID: " + id));
+    }
+
+    public User findUserById(String id){
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
+    public UserDto findUserDtoById(String id){
+        User user = findUserById(id);
+        return userMapper.toDto(user);
     }
 
     public UserDto uploadAvatar(MultipartFile avatar) {

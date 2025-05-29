@@ -19,6 +19,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-mail:3.4.2")
 
     /**
      * ElasticSearch
@@ -53,6 +55,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    /**
+     * Kafka
+     */
+    implementation("org.springframework.kafka:spring-kafka")
 }
 
 tasks.test {

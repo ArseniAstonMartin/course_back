@@ -64,6 +64,36 @@ services:
     networks:
       - default
 
+  kafka:
+    image: apache/kafka:latest
+    container_name: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_HOST:PLAINTEXT,PLAINTEXT_DOCKER:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL: PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT_HOST://:9092,PLAINTEXT_DOCKER://:9094,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:9092, PLAINTEXT_DOCKER://kafka:9094
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_LISTENER_NAME: PLAINTEXT_HOST
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_HOST
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+      - "9094:9094"
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8079:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: true
+      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: "kafka:9094"
+
 volumes:
   db-data:
     driver: local
