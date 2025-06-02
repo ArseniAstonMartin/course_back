@@ -27,6 +27,8 @@ services:
   mongodb:
     image: mongo:latest
     container_name: mongodb
+    networks:
+      - mongodb_network
     command: [ "/bin/sh", "-c", "openssl rand -base64 756 > /data/db/mongo-keyfile && chmod 400 /data/db/mongo-keyfile && exec mongod --auth --replSet rs0 --bind_ip_all --keyFile /data/db/mongo-keyfile" ]
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongouser
@@ -44,13 +46,18 @@ services:
   mongo-express:
     image: mongo-express
     container_name: mongo-express
+    networks:
+      - mongodb_network
     restart: always
     ports:
       - 8081:8081
     environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://mongodb:27017
       - ME_CONFIG_MONGODB_ADMINUSERNAME=mongouser
       - ME_CONFIG_MONGODB_ADMINPASSWORD=mongopassword
       - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_BASICAUTH_USERNAME=expressadmin
+      - ME_CONFIG_BASICAUTH_PASSWORD=expresspassword
 
   elasticsearch:
     image: elasticsearch:9.0.1
@@ -101,5 +108,5 @@ volumes:
     driver: local
 
 networks:
-  default:
-    name: mongodb_network
+  mongodb_network:
+    driver: bridge

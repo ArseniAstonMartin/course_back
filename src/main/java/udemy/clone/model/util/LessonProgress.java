@@ -15,7 +15,6 @@ public class LessonProgress {
     private String lessonProgressId;
     private String studentId;
     private String lessonId;
-    private String studentId;
     private Status status;
 
     public enum Status {
