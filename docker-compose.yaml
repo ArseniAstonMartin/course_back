@@ -29,7 +29,12 @@ services:
     container_name: mongodb
     networks:
       - mongodb_network
-    command: [ "/bin/sh", "-c", "openssl rand -base64 756 > /data/db/mongo-keyfile && chmod 400 /data/db/mongo-keyfile && exec mongod --auth --replSet rs0 --bind_ip_all --keyFile /data/db/mongo-keyfile" ]
+    command: [ "/bin/sh", "-c", "
+      mongod --bind_ip_all --replSet rs0 --noauth &
+      sleep 5 && mongosh --eval 'db = db.getSiblingDB(\"admin\"); db.createUser({ user: \"mongouser\", pwd: \"mongopassword\", roles: [{ role: \"root\", db: \"admin\" }] });';
+      sleep 5 && mongod --shutdown;
+      exec mongod --auth --replSet rs0 --bind_ip_all --keyFile /data/db/mongo-keyfile
+    " ]
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongouser
       - MONGO_INITDB_ROOT_PASSWORD=mongopassword
@@ -37,6 +42,7 @@ services:
       - "27017:27017"
     volumes:
       - db-data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
     healthcheck:
       test: [ "CMD", "mongosh", "--eval", "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017'}]}) }" ]
       interval: 5s
